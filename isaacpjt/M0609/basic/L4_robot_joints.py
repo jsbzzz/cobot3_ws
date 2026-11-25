@@ -57,9 +57,9 @@ print(f"순간이동 후 | joint_1 {np.degrees(q[arm[0]]):6.1f} deg | 그리퍼 
 # ============================================================
 # 3. 메인 루프 (창이 열려 있는 동안 한 프레임씩 진행)
 # ============================================================
-MOVE_FRAME = 100
-STEP_DEG = 1.5
-goal_deg = -45
+MOVE_FRAME = 100  # 첫 이동을 시작할 프레임
+STEP_DEG = 1.5     # 한 프레임에 바꿀 수 있는 모터 목표 각도
+goal_deg = -45   # 이번 이동의 최종 목표 각도
 target = start.copy()
 frame = 0
 
@@ -72,11 +72,15 @@ while simulation_app.is_running():
 
     cur_deg = np.degrees(robot.get_joint_positions()[arm[0]])
     if frame == MOVE_FRAME:
+        # 첫 출발 때 실제 관절 각도를 모터 명령의 시작점으로 잡는다.
         command_deg = cur_deg
     elif command_deg == goal_deg and abs(cur_deg - goal_deg) < 1.0:
+        # 최종 목표를 이미 보냈고 실제 관절도 1도 미만으로 가까워지면 방향을 바꾼다.
         print(f"{frame} 프레임 | joint_1 {cur_deg:6.1f} deg, {goal_deg} deg 도착")
         goal_deg = -goal_deg
 
+    # 남은 각도가 한 번에 움직일 수 있는 범위면 최종 목표를 바로 보낸다.
+    # 그보다 멀면 목표 방향으로 STEP_DEG만큼 모터 명령을 바꾼다.
     remaining_deg = goal_deg - command_deg
     if abs(remaining_deg) <= STEP_DEG:
         command_deg = goal_deg
