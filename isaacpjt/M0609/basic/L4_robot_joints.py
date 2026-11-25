@@ -21,8 +21,7 @@ from isaacsim.core.api import World
 from isaacsim.core.prims import SingleArticulation
 from isaacsim.core.utils.stage import add_reference_to_stage
 from isaacsim.core.utils.types import ArticulationAction
-
-
+import time 
 ROBOT_USD = Path(__file__).resolve().parents[1] / "robot" / "m0609_rg2_d455.usd"  # isaacpjt/M0609/robot
 
 world = World(stage_units_in_meters=1.0)
@@ -57,39 +56,51 @@ print(f"순간이동 후 | joint_1 {np.degrees(q[arm[0]]):6.1f} deg | 그리퍼 
 # ============================================================
 # 3. 메인 루프 (창이 열려 있는 동안 한 프레임씩 진행)
 # ============================================================
-MOVE_FRAME = 100  # 첫 이동을 시작할 프레임
-STEP_DEG = 1.5     # 한 프레임에 바꿀 수 있는 모터 목표 각도
-goal_deg = -45   # 이번 이동의 최종 목표 각도
-target = start.copy()
-frame = 0
+MOVE_FRAME = 100
 
+target_deg = -45  # 추가: 목표 각도
+tolerance = 1.0   # 추가: 도착 허용 오차
+
+frame = 0
 while simulation_app.is_running():
     world.step(render=True)
+    time.sleep(0.03)
     frame += 1
 
-    if frame < MOVE_FRAME:
-        continue
-
-    cur_deg = np.degrees(robot.get_joint_positions()[arm[0]])
     if frame == MOVE_FRAME:
-        # 첫 출발 때 실제 관절 각도를 모터 명령의 시작점으로 잡는다.
-        command_deg = cur_deg
-    elif command_deg == goal_deg and abs(cur_deg - goal_deg) < 1.0:
-        # 최종 목표를 이미 보냈고 실제 관절도 1도 미만으로 가까워지면 방향을 바꾼다.
-        print(f"{frame} 프레임 | joint_1 {cur_deg:6.1f} deg, {goal_deg} deg 도착")
-        goal_deg = -goal_deg
+        target = start.copy()
+        target[arm] = np.radians([-45, 0, 90, 0, 90, 0])
+        target[finger] = 0.9
 
-    # 남은 각도가 한 번에 움직일 수 있는 범위면 최종 목표를 바로 보낸다.
-    # 그보다 멀면 목표 방향으로 STEP_DEG만큼 모터 명령을 바꾼다.
-    remaining_deg = goal_deg - command_deg
-    if abs(remaining_deg) <= STEP_DEG:
-        command_deg = goal_deg
-    else:
-        command_deg += np.copysign(STEP_DEG, remaining_deg)
+        print("모터 목표 명령 target (관절 12개, rad):",
+              np.round(target, 3).tolist())
 
-    target[arm[0]] = np.radians(command_deg)
-    target[finger] = 0.9 if goal_deg < 0 else 0.0  # 왼쪽 닫기, 오른쪽 열기
-    robot.apply_action(ArticulationAction(joint_positions=target))
+        robot.apply_action(ArticulationAction(joint_positions=target))
+
+    # 추가: 현재 관절 각도 확인
+    if frame >= MOVE_FRAME:
+        q = robot.get_joint_positions()
+        current_deg = np.degrees(q[arm[0]])
+
+        # 추가: 목표 각도에 도착했는지 확인
+        if abs(current_deg - target_deg) <= tolerance:
+
+            print(f"{frame} 프레임 | joint_1 {current_deg:6.1f} deg, {target_deg} deg 도착")
+
+            # 추가: 반대 방향으로 목표 변경
+            target_deg = -target_deg
+
+            target = start.copy()
+            target[arm[0]] = np.radians(target_deg)
+
+            # 추가: 그리퍼 열고 닫기
+            if target_deg == -45:
+                target[finger] = 0.9
+            else:
+                target[finger] = 0.0
+
+            robot.apply_action(ArticulationAction(joint_positions=target))
+
 # ============================================================
 # 4. 종료
 # ============================================================

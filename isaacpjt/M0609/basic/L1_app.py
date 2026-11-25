@@ -1,4 +1,7 @@
-"""[L1 연습 정답] 앱 시작과 종료"""
+"""[L1 예제] Isaac Sim standalone 의 가장 기본 골격 (4단계)
+
+실행: isaac_python L1_app.py   (창을 닫으면 종료)
+"""
 
 # ============================================================
 # 1. 앱 시작 (Isaac 모듈보다 먼저)
@@ -7,25 +10,26 @@ from isaacsim import SimulationApp
 
 simulation_app = SimulationApp({"headless": False})
 
+
 # ============================================================
 # 2. Isaac 모듈 import (앱을 켠 뒤에)
 # ============================================================
-from isaacsim.core.api import World  # SimulationApp 을 만든 뒤에 import
+from isaacsim.core.version import get_version
 
-world = World()
-print("World 생성 성공")
+print("Isaac Sim 버전:", get_version()[0])
 
 # ============================================================
 # 3. 메인 루프 (창이 열려 있는 동안 한 프레임씩 진행)
 # ============================================================
 frame = 0
+
 while simulation_app.is_running():
     simulation_app.update()
-    frame += 1  # 프레임 세기
+
+    frame += 1
     if frame % 60 == 0:
-        print(f"{frame} 프레임")
-    if frame >= 300:  # 정해진 프레임 후 종료
-        print("300 프레임이 지나 종료합니다")
+        print(f'{frame} 프레임')
+    if frame == 300:
         break
 
 # ============================================================

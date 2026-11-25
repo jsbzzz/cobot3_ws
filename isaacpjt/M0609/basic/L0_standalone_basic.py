@@ -6,8 +6,8 @@ import omni.usd
 from isaacsim.core.api import World
 from isaacsim.core.api.objects import DynamicCuboid
 
-world = World(stage_units_in_meters=1.0)                # 2. World ì”¬ì˜ ë‹¨ìœ„ë¥¼ ë¯¸í„°ë¡œ ì„¤ì •í•œë‹¤, ì´í›„ ëª¨ë“  ì¢Œí‘œê°’ì´ ì‹¤ì œ ë¯¸í„° ë‹¨ìœ„ë¡œ ë™ìž‘í•œë‹¤.
-stage = omni.usd.get_context().get_stage()              # 3. Stage USD ì”¬ ë°ì´í„°ì— ì§ì ‘ ì ‘ê·¼í•˜ëŠ” ì§„ìž…ì ì´ë‹¤
+world = World(stage_units_in_meters=1.0)                # 2. World 씬의 단위를 미터로 설정한다, 이후 모든 좌표값이 실제 미터 단위로 동작한다.
+stage = omni.usd.get_context().get_stage()              # 3. Stage USD 씬 데이터에 직접 접근하는 진입점이다
 
 cube_prim = DynamicCuboid(                              # 4. Prim
     prim_path="/World/BlueCube",
@@ -17,10 +17,10 @@ cube_prim = DynamicCuboid(                              # 4. Prim
     color=np.array([0.0, 0.0, 1.0]),
 )
 
-world.scene.add_default_ground_plane() #ë°”ë‹¥             # 5. Scene
-world.scene.add(cube_prim) #ì›ë“œì— ì˜¤ë¸Œì íŠ¸ ë“±ë¡
+world.scene.add_default_ground_plane() #바닥             # 5. Scene
+world.scene.add(cube_prim) #원드에 오브젝트 등록
 
-world.reset() #ë¬¼ë¦¬ë¥¼ ì´ˆê¸°í™”í•˜ê³  ì”¬ì„ í™•ì •
+world.reset() #물리를 초기화하고 씬을 확정
 
 while simulation_app.is_running():                      # 6. Simulation
     world.step(render=True)
