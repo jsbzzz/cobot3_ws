@@ -1,8 +1,4 @@
-"""[L5 연습] Stop -> Play 해도 처음부터 다시 (문제는 L5 강의 페이지의 "연습 문제")
-
-실행: isaac_python L5_main_loop_quiz.py
-      창에서 Play 중에 Stop -> 다시 Play 를 눌러 보라
-"""
+"""[L5 연습 정답] Stop -> Play 해도 처음부터 다시"""
 
 from pathlib import Path
 
@@ -58,13 +54,13 @@ send_goal(goal_deg)
 # ============================================================
 # 3. 메인 루프 (창이 열려 있는 동안 한 프레임씩 진행)
 # ============================================================
-reset_needed = False
+reset_needed = False  # Stop 을 눌렀는지 기억해 둔다
 while simulation_app.is_running():
     world.step(render=True)
-    if world.is_stopped() and not reset_needed:
+    if world.is_stopped() and not reset_needed:  # Stop 을 감지해 둔다
         reset_needed = True
     if world.is_playing():
-        if reset_needed:
+        if reset_needed:  # Stop 다음 첫 Play 프레임: 먼저 reset, 내 변수도 처음 값으로
             world.reset()
             goal_deg = -45.0
             send_goal(goal_deg)
