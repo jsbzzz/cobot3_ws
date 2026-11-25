@@ -22,7 +22,7 @@ from isaacsim.core.api.objects import DynamicCuboid
 START_POSITION = np.array([0.0, 0.0, 1.0])
 LOW_HEIGHT = 0.15  # 큐브 중심이 이보다 낮으면 "바닥 가까이" (바닥에 닿기 전에 올려서 튕기거나 구르지 않게)
 
-world = World(stage_units_in_meters=1.0, physics_dt=1.0/360, rendering_dt=1/240)
+world = World(stage_units_in_meters=1.0)
 world.scene.add_default_ground_plane()
 # 조명: 화면 위 Lighting 메뉴에서 "Default" 를 고른 것과 같다
 omni.kit.commands.execute("SetLightingMenuModeCommand", lighting_mode="Default")
